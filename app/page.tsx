@@ -488,48 +488,127 @@ export default function Home() {
     </div>
   );
 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const menuItems: Array<'Home' | 'Projects' | 'Chats' | 'Settings'> = ['Home', 'Projects', 'Chats', 'Settings'];
   const menuIcons: Record<string, string> = { Home: '🏠', Projects: '📁', Chats: '💬', Settings: '⚙️' };
 
+  const sidebarW = sidebarOpen ? '228px' : '56px';
+
   return (
     <div style={{ display: 'flex', height: '100vh', background: T.mainBg, color: T.text, overflow: 'hidden', fontFamily: 'system-ui,-apple-system,sans-serif' }}>
-      {/* Sidebar */}
-      <div style={{ width: '228px', minWidth: '228px', maxWidth: '228px', background: T.sidebar, borderRight: `1px solid ${T.sidebarBorder}`, display: 'flex', flexDirection: 'column', padding: '20px 13px', overflow: 'hidden' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{ fontSize: '1.35rem', fontWeight: 900, background: 'linear-gradient(135deg,#6366f1,#a855f7,#ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>v0 Clone</div>
-          <div style={{ fontSize: '0.62rem', color: T.subtext, marginTop: '2px' }}>by {settings.userName}</div>
+
+      {/* --- SIDEBAR --- */}
+      <div style={{
+        width: sidebarW, minWidth: sidebarW, maxWidth: sidebarW,
+        background: T.sidebar, borderRight: `1px solid ${T.sidebarBorder}`,
+        display: 'flex', flexDirection: 'column',
+        padding: sidebarOpen ? '20px 13px' : '20px 8px',
+        overflow: 'hidden',
+        transition: 'width 0.22s ease, min-width 0.22s ease, max-width 0.22s ease, padding 0.22s ease',
+      }}>
+
+        {/* Top row: logo + toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', marginBottom: '18px', minHeight: '32px' }}>
+          {sidebarOpen && (
+            <div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 900, background: 'linear-gradient(135deg,#6366f1,#a855f7,#ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>v0 Clone</div>
+              <div style={{ fontSize: '0.6rem', color: T.subtext, marginTop: '1px' }}>by {settings.userName}</div>
+            </div>
+          )}
+          {/* Toggle button */}
+          <button
+            onClick={() => setSidebarOpen(o => !o)}
+            title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            style={{
+              width: '28px', height: '28px', borderRadius: '7px',
+              background: T.cardBg, border: `1px solid ${T.cardBorder}`,
+              color: T.subtext, cursor: 'pointer', fontSize: '0.75rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, transition: 'background 0.15s',
+            }}>
+            {sidebarOpen ? '◀' : '▶'}
+          </button>
         </div>
-        <button onClick={startNew} style={{ width: '100%', padding: '9px', background: T.btnPrimary, border: 'none', borderRadius: '9px', color: '#fff', fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '0.95rem' }}>+</span> New Chat
+
+        {/* New Chat */}
+        <button
+          onClick={startNew}
+          title="New Chat"
+          style={{
+            width: '100%', padding: sidebarOpen ? '9px' : '9px 0',
+            background: T.btnPrimary, border: 'none', borderRadius: '9px',
+            color: '#fff', fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer',
+            marginBottom: '14px', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden',
+          }}>
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}>+</span>
+          {sidebarOpen && 'New Chat'}
         </button>
-        <div style={{ marginBottom: '16px' }}>
+
+        {/* Nav items */}
+        <div style={{ marginBottom: '14px' }}>
           {menuItems.map(item => (
-            <button key={item} onClick={() => setActiveView(item)} style={{ width: '100%', textAlign: 'left', padding: '8px 11px', borderRadius: '8px', border: 'none', background: activeView === item ? T.cardBg : 'transparent', color: activeView === item ? T.text : T.subtext, fontSize: '0.78rem', cursor: 'pointer', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: activeView === item ? 600 : 400 }}>
-              <span>{menuIcons[item]}</span>
-              <span style={{ flex: 1 }}>{item}</span>
-              {item === 'Projects' && projects.length > 0 && <span style={{ fontSize: '0.58rem', background: T.inputBg, color: T.subtext, padding: '1px 5px', borderRadius: '99px', border: `1px solid ${T.cardBorder}` }}>{projects.length}</span>}
-              {item === 'Chats' && chats.length > 0 && <span style={{ fontSize: '0.58rem', background: T.inputBg, color: T.subtext, padding: '1px 5px', borderRadius: '99px', border: `1px solid ${T.cardBorder}` }}>{chats.length}</span>}
+            <button
+              key={item}
+              onClick={() => setActiveView(item)}
+              title={item}
+              style={{
+                width: '100%', padding: '8px', borderRadius: '8px', border: 'none',
+                background: activeView === item ? T.cardBg : 'transparent',
+                color: activeView === item ? T.text : T.subtext,
+                fontSize: '0.78rem', cursor: 'pointer', marginBottom: '2px',
+                display: 'flex', alignItems: 'center',
+                justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                gap: '8px', fontWeight: activeView === item ? 600 : 400,
+                whiteSpace: 'nowrap', overflow: 'hidden',
+              }}>
+              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{menuIcons[item]}</span>
+              {sidebarOpen && (
+                <>
+                  <span style={{ flex: 1, textAlign: 'left' }}>{item}</span>
+                  {item === 'Projects' && projects.length > 0 && (
+                    <span style={{ fontSize: '0.58rem', background: T.inputBg, color: T.subtext, padding: '1px 5px', borderRadius: '99px', border: `1px solid ${T.cardBorder}` }}>{projects.length}</span>
+                  )}
+                  {item === 'Chats' && chats.length > 0 && (
+                    <span style={{ fontSize: '0.58rem', background: T.inputBg, color: T.subtext, padding: '1px 5px', borderRadius: '99px', border: `1px solid ${T.cardBorder}` }}>{chats.length}</span>
+                  )}
+                </>
+              )}
             </button>
           ))}
         </div>
-        <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-          <p style={{ fontSize: '0.58rem', fontWeight: 700, color: T.subtext, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px', paddingLeft: '11px' }}>Recent</p>
-          {chats.length > 0 ? chats.slice(0, 8).map((chat, i) => (
-            <button key={i} onClick={() => { setActiveView('Home'); loadChat(chat); }} style={{ width: '100%', textAlign: 'left', padding: '6px 11px', borderRadius: '6px', border: 'none', background: 'transparent', color: T.subtext, fontSize: '0.7rem', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{chat.prompt}</button>
-          )) : <p style={{ fontSize: '0.68rem', color: T.subtext, paddingLeft: '11px', opacity: 0.45 }}>No history</p>}
-        </div>
-        <div style={{ paddingTop: '13px', borderTop: `1px solid ${T.sidebarBorder}`, display: 'flex', alignItems: 'center', gap: '7px' }}>
+
+        {/* Recent chats — only when open */}
+        {sidebarOpen && (
+          <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+            <p style={{ fontSize: '0.57rem', fontWeight: 700, color: T.subtext, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px', paddingLeft: '8px' }}>Recent</p>
+            {chats.length > 0 ? chats.slice(0, 8).map((chat, i) => (
+              <button key={i} onClick={() => { setActiveView('Home'); loadChat(chat); }}
+                style={{ width: '100%', textAlign: 'left', padding: '6px 8px', borderRadius: '6px', border: 'none', background: 'transparent', color: T.subtext, fontSize: '0.68rem', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                {chat.prompt}
+              </button>
+            )) : <p style={{ fontSize: '0.65rem', color: T.subtext, paddingLeft: '8px', opacity: 0.4 }}>No history</p>}
+          </div>
+        )}
+
+        {/* Spacer when collapsed */}
+        {!sidebarOpen && <div style={{ flex: 1 }} />}
+
+        {/* Footer */}
+        <div style={{ paddingTop: '12px', borderTop: `1px solid ${T.sidebarBorder}`, display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'flex-start' : 'center', gap: '7px', overflow: 'hidden' }}>
           <span style={{ width: '7px', height: '7px', background: '#22c55e', borderRadius: '50%', flexShrink: 0, boxShadow: '0 0 5px #22c55e88' }}></span>
-          <span style={{ fontSize: '0.62rem', color: T.subtext }}>Powered by v0 SDK</span>
+          {sidebarOpen && <span style={{ fontSize: '0.6rem', color: T.subtext, whiteSpace: 'nowrap' }}>Powered by v0 SDK</span>}
         </div>
       </div>
-      {/* Main */}
-      <div style={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
+
+      {/* --- MAIN CONTENT --- */}
+      <div style={{ flex: 1, overflow: 'auto', minWidth: 0, transition: 'all 0.22s ease' }}>
         {activeView === 'Home' && renderHome()}
         {activeView === 'Projects' && renderProjects()}
         {activeView === 'Chats' && renderChats()}
         {activeView === 'Settings' && renderSettings()}
       </div>
+
       {renderModal()}
     </div>
   );
