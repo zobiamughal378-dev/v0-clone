@@ -17,6 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [selectedFont, setSelectedFont] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('');
+  const [selectedLayout, setSelectedLayout] = useState<number | null>(null);  // Learn More ke liye
 
   // Initial layouts state
   const [layouts, setLayouts] = useState<Layout[]>([
@@ -55,7 +56,7 @@ export default function Home() {
 
     setLoading(true);
     
-    // Simulate AI generation (actual AI baad mein add karenge)
+    // Simulate AI generation
     setTimeout(() => {
       const newLayouts = [
         {
@@ -91,7 +92,7 @@ export default function Home() {
   };
 
   // EDIT FONT FUNCTION
-  const editFont = (layoutId: number, fontType: string) => {
+  const editFont = (layoutId: number) => {
     setLayouts(layouts.map(layout => {
       if (layout.id === layoutId) {
         // Toggle between fonts
@@ -106,6 +107,7 @@ export default function Home() {
     }));
     
     setSelectedFont(`Font changed for layout ${layoutId}`);
+    setTimeout(() => setSelectedFont(''), 2000);
   };
 
   // CHANGE STYLE FUNCTION
@@ -114,28 +116,39 @@ export default function Home() {
       if (layout.id === layoutId) {
         // Cycle through different styles
         const colors = [
-          { bg: 'bg-red-50', btn: 'bg-red-600' },
-          { bg: 'bg-yellow-50', btn: 'bg-yellow-600' },
-          { bg: 'bg-teal-50', btn: 'bg-teal-600' }
+          { bg: 'bg-red-50', btn: 'bg-red-600 hover:bg-red-700' },
+          { bg: 'bg-yellow-50', btn: 'bg-yellow-600 hover:bg-yellow-700' },
+          { bg: 'bg-teal-50', btn: 'bg-teal-600 hover:bg-teal-700' },
+          { bg: 'bg-blue-50', btn: 'bg-blue-600 hover:bg-blue-700' },
+          { bg: 'bg-purple-50', btn: 'bg-purple-600 hover:bg-purple-700' }
         ];
         
         const currentColor = layout.bgColor;
-        let newColor = colors[0];
-        
-        if (currentColor.includes('red')) newColor = colors[1];
-        else if (currentColor.includes('yellow')) newColor = colors[2];
-        else newColor = colors[0];
+        const currentIndex = colors.findIndex(c => c.bg === currentColor);
+        const nextColor = colors[(currentIndex + 1) % colors.length];
         
         return { 
           ...layout, 
-          bgColor: newColor.bg,
-          buttonStyle: `${newColor.btn} hover:${newColor.btn.replace('bg-', 'hover:bg-')}`
+          bgColor: nextColor.bg,
+          buttonStyle: nextColor.btn
         };
       }
       return layout;
     }));
     
     setSelectedStyle(`Style updated for layout ${layoutId}`);
+    setTimeout(() => setSelectedStyle(''), 2000);
+  };
+
+  // LEARN MORE FUNCTION
+  const showDetails = (layoutId: number, title: string, description: string) => {
+    setSelectedLayout(layoutId);
+    
+    // Alert mein details dikhao
+    alert(`📋 ${title}\n\n${description}\n\n✨ Features:\n• Fully responsive design\n• Customizable colors\n• Modern UI components\n• SEO optimized\n\nContact us for more details!`);
+    
+    // 2 second baad highlight hata do
+    setTimeout(() => setSelectedLayout(null), 2000);
   };
 
   return (
@@ -194,7 +207,7 @@ export default function Home() {
 
         {/* Status Messages */}
         {(selectedFont || selectedStyle) && (
-          <div className="mb-6 bg-green-600 text-white p-4 rounded-xl animate-pulse">
+          <div className="mb-6 bg-green-600 text-white p-4 rounded-xl animate-pulse text-center">
             ✅ {selectedFont} {selectedStyle}
           </div>
         )}
@@ -204,7 +217,9 @@ export default function Home() {
           {layouts.map((layout) => (
             <div 
               key={layout.id} 
-              className={`${layout.bgColor} rounded-2xl shadow-2xl overflow-hidden transform transition-all hover:scale-105 duration-300 border border-gray-700`}
+              className={`${layout.bgColor} rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 border border-gray-700 ${
+                selectedLayout === layout.id ? 'ring-4 ring-yellow-400 scale-105' : 'hover:scale-105'
+              }`}
             >
               {/* Header */}
               <div className="bg-gray-800 text-white p-5 border-b border-gray-700">
@@ -215,7 +230,7 @@ export default function Home() {
               <div className="p-6">
                 {/* Preview Box */}
                 <div className={`${layout.fontFamily} ${layout.bgColor} p-6 rounded-xl min-h-[200px] border-2 border-dashed border-gray-600 flex flex-col items-center justify-center text-center`}>
-                  <div className={`w-16 h-16 rounded-full ${layout.buttonStyle} mb-4 flex items-center justify-center text-white text-2xl`}>
+                  <div className={`w-16 h-16 rounded-full ${layout.buttonStyle.split(' ')[0]} mb-4 flex items-center justify-center text-white text-2xl`}>
                     {layout.id}
                   </div>
                   <p className="text-gray-800 font-medium mb-2">
@@ -224,15 +239,20 @@ export default function Home() {
                   <p className="text-sm text-gray-600">
                     Font: {layout.fontFamily.replace('font-', '')}
                   </p>
-                  <button className={`mt-4 ${layout.buttonStyle} text-white px-6 py-2 rounded-lg text-sm transition-colors`}>
-                    Learn More
+                  
+                  {/* Learn More Button - AB KAAM KAREGA */}
+                  <button 
+                    onClick={() => showDetails(layout.id, layout.title, layout.description)}
+                    className={`mt-4 ${layout.buttonStyle} text-white px-6 py-2 rounded-lg text-sm transition-colors font-medium`}
+                  >
+                    Learn More →
                   </button>
                 </div>
                 
-                {/* Control Buttons - YEH AB WORK KARENGE */}
+                {/* Control Buttons */}
                 <div className="mt-6 flex gap-3 justify-center">
                   <button
-                    onClick={() => editFont(layout.id, '')}
+                    onClick={() => editFont(layout.id)}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
                   >
                     ✏️ Edit Font
@@ -254,9 +274,10 @@ export default function Home() {
           <h4 className="text-white font-bold mb-2">📝 How to use:</h4>
           <ul className="text-gray-400 space-y-1 text-sm">
             <li>1. Enter any prompt in the text area</li>
-            <li>2. Click &quot;Generate 3 Layouts&quot; - buttons work!</li>
+            <li>2. Click &quot;Generate 3 Layouts&quot; - 3 unique layouts banege</li>
             <li>3. Click &quot;Edit Font&quot; to change font style</li>
             <li>4. Click &quot;Change Style&quot; to change colors</li>
+            <li>5. Click &quot;Learn More&quot; to see layout details ✨</li>
           </ul>
         </div>
       </div>
